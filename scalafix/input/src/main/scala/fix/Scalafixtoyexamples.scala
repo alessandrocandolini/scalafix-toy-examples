@@ -4,5 +4,5 @@ rule = Scalafixtoyexamples
 package fix
 
 object Scalafixtoyexamples {
-  // Add code that needs fixing here.
+  val x = 42
 }

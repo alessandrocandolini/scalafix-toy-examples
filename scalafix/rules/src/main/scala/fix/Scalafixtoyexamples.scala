@@ -9,7 +9,10 @@ class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
     println("Tree.syntax: " + doc.tree.syntax)
     println("Tree.structure: " + doc.tree.structure)
     println("Tree.structureLabeled: " + doc.tree.structureLabeled)
-    Patch.empty
+    doc.tree.collect {
+      case t @ Lit.Int(42) => 
+        Patch.removeTokens(t.tokens) + Patch.addRight(t, "43")
+    }.asPatch
   }
 
 }
