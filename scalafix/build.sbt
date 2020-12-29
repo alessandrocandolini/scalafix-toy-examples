@@ -30,11 +30,13 @@ lazy val rules = project.settings(
 )
 
 lazy val input = project.settings(
-  skip in publish := true
+  skip in publish := true,
+  libraryDependencies += ("org.typelevel" %% "cats-core" % "0.9.0")
 )
 
 lazy val output = project.settings(
-  skip in publish := true
+  skip in publish := true,
+  libraryDependencies += ("org.typelevel" %% "cats-core" % "2.3.1")
 )
 
 lazy val tests = project
