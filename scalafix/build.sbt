@@ -1,11 +1,14 @@
 lazy val V = _root_.scalafix.sbt.BuildInfo
 inThisBuild(
   List(
-    scalaVersion := V.scala212,
+    scalaVersion := V.scala212, // the example from cats would not work  in scala 2.13
     crossScalaVersions := List(V.scala213, V.scala212, V.scala211),
+    version := "0.0.1-SNAPSHOT",
     organization := "com.example",
     homepage := Some(url("https://github.com/com/example")),
-    licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    licenses := List(
+      "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")
+    ),
     developers := List(
       Developer(
         "example-username",
@@ -43,14 +46,14 @@ lazy val tests = project
   .settings(
     skip in publish := true,
     libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % V.scalafixVersion % Test cross CrossVersion.full,
-    compile.in(Compile) := 
+    compile.in(Compile) :=
       compile.in(Compile).dependsOn(compile.in(input, Compile)).value,
     scalafixTestkitOutputSourceDirectories :=
       unmanagedSourceDirectories.in(output, Compile).value,
     scalafixTestkitInputSourceDirectories :=
       unmanagedSourceDirectories.in(input, Compile).value,
     scalafixTestkitInputClasspath :=
-      fullClasspath.in(input, Compile).value,
+      fullClasspath.in(input, Compile).value
   )
   .dependsOn(rules)
   .enablePlugins(ScalafixTestkitPlugin)
