@@ -1,3 +1,5 @@
+![Continuous Integration](https://github.com/alessandrocandolini/scalafix-toy-examples/workflows/Continuous%20Integration/badge.svg)
+
 # scalafix-toy-examples
 
 Toy playground for scalafix, adapting few examples found in online tutorials and talks. 
