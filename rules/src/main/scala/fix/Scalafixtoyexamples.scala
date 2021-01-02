@@ -109,12 +109,6 @@ object Scalafixtoyexamples {
 
     def isEmpty: Boolean = t.inits.isEmpty
 
-    def extendsOneOf(extensions: List[String]): Boolean =
-      extensions.exists(t.inits.map(_.tpe.toString()).contains)
-
-    def extendsAll(extensions: List[String]): Boolean =
-      extensions.forall(t.inits.map(_.tpe.toString()).contains)
-
     def extendsType: String => Boolean = t.inits.map(_.tpe.toString()).contains
   }
 }
