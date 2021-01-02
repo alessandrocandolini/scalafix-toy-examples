@@ -5,6 +5,7 @@ import scala.meta._
 import metaconfig.Conf.Bool
 
 import Scalafixtoyexamples._
+import scala.collection.immutable.Nil
 
 class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
 
@@ -25,27 +26,35 @@ class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
     if (template.isEmpty) {
       Patch.addRight(t, s" extends Product with Serializable")
     } else {
+      val tpes = template.inits.map(_.tpe.syntax)
 
-      val productType = "Product"
-      val serializableType = "Serializable"
-      if (template.extendsType(productType) && template.extendsType(serializableType)) {
-        Patch.empty
-      } else if (template.extendsType(productType) && !template.extendsType(serializableType)) {
-        Patch.addRight(template, s" with Serializable")
-      } else if (!template.extendsType(productType) && template.extendsType(serializableType)) {
-        Patch.addRight(template, s" with Product")
-      } else {
-        Patch.addRight(template, s" with Product with Serializable")
-      }
+      val oldTokens = template.tokens
+        .map(_.text)
+        .filter(p => p != "with" && p != "Product" && p != "Serializable")
+        .map(_.trim())
+        .filter(_.nonEmpty)
+
+      val newTokens = oldTokens ++ List("Product", "Serializable")
+
+      val removeTokensPatch = Patch.removeTokens(template.tokens)
+      val addTokenPatch =
+        Patch.addRight(template, newTokens.mkString(" with "))
+
+      removeTokensPatch + addTokenPatch
+
     }
   }
+
+  def finalCaseClass(implicit doc: SemanticDocument): Patch = doc.tree.collect {
+    case c: Defn.Class if c.isCase && !c.isFinal => Patch.addLeft(c, "final ")
+  }.asPatch
 
   override def fix(implicit doc: SemanticDocument): Patch = {
     // print code has is
     println("Tree.syntax: " + doc.tree.syntax)
     println("Tree.structure: " + doc.tree.structure)
     println("Tree.structureLabeled: " + doc.tree.structureLabeled)
-    replace42 + replaceCoproduct
+    replace42 + replaceCoproduct + finalCaseClass
   }
 
 }
@@ -64,6 +73,8 @@ object Scalafixtoyexamples {
     private def tmods = HasMods.mods(t)
     def isSealed = tmods.exists(_.is[Mod.Sealed])
     def isAbstract = tmods.exists(_.is[Mod.Abstract])
+    def isFinal = tmods.exists(_.is[Mod.Final])
+    def isCase = tmods.exists(_.is[Mod.Case])
   }
 
   implicit val classHasMods: HasMods[Defn.Class] = new HasMods[Defn.Class] {
@@ -87,17 +98,19 @@ object Scalafixtoyexamples {
       hasTemplate.template(t)
   }
 
-  implicit val classHasTemplate: HasTemplate[Defn.Class] = new HasTemplate[Defn.Class] {
+  implicit val classHasTemplate: HasTemplate[Defn.Class] =
+    new HasTemplate[Defn.Class] {
 
-    override def template(t: Defn.Class): Template = t.templ
+      override def template(t: Defn.Class): Template = t.templ
 
-  }
+    }
 
-  implicit val traitHasTemplate: HasTemplate[Defn.Trait] = new HasTemplate[Defn.Trait] {
+  implicit val traitHasTemplate: HasTemplate[Defn.Trait] =
+    new HasTemplate[Defn.Trait] {
 
-    override def template(t: Defn.Trait): Template = t.templ
+      override def template(t: Defn.Trait): Template = t.templ
 
-  }
+    }
 
   final implicit class HasTemplateOps[T: HasTemplate](private val t: T) {
 
@@ -109,6 +122,6 @@ object Scalafixtoyexamples {
 
     def isEmpty: Boolean = t.inits.isEmpty
 
-    def extendsType: String => Boolean = t.inits.map(_.tpe.toString()).contains
+    def extendsType: String => Boolean = t.inits.map(_.tpe.syntax).contains
   }
 }

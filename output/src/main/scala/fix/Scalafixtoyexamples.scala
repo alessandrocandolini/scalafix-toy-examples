@@ -9,6 +9,11 @@ object Scalafixtoyexamples {
 }
 
 object Test {
+  trait Useless
+  trait Useless2 extends Useless
+  trait Useless3
+  trait Useless4 extends Useless3 with Useless2
+
   sealed trait Colour1 extends Product with Serializable
   final case class Red1(opacity: Int) extends Colour1
   final case object Green1 extends Colour1
@@ -28,4 +33,16 @@ object Test {
   sealed abstract class Colour5 extends Product with Serializable
   final case class Red5(opacity: Int) extends Colour5
   final case object Green5 extends Colour5
+
+  sealed abstract class Colour6 extends Useless4 with Product with Serializable
+  final case class Red6(opacity: Int) extends Colour6
+  final case object Green6 extends Colour6
+
+  sealed abstract class Colour7 extends Useless4 with Product with Serializable
+  final case class Red7(opacity: Int) extends Colour7
+  final case object Green7 extends Colour7
+
+  sealed abstract class Colour8 extends Useless4 with Product with Serializable
+  final case class Red8(opacity: Int) extends Colour8
+  final case object Green8 extends Colour8
 }
