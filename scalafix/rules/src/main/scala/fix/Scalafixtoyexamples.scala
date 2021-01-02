@@ -23,12 +23,19 @@ class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
   def patch[T <: Tree](t: T)(implicit hasTemplate: HasTemplate[T]): Patch = {
     val template = t.template
     if (template.isEmpty) {
-      Patch.addRight(t, s"")
+      Patch.addRight(t, s" extends Product with Serializable")
     } else {
-      if (template.extendsOneOf(List("Products", "Serializable"))) {
+
+      val productType = "Product"
+      val serializableType = "Serializable"
+      if (template.extendsType(productType) && template.extendsType(serializableType)) {
         Patch.empty
+      } else if (template.extendsType(productType) && !template.extendsType(serializableType)) {
+        Patch.addRight(template, s" with Serializable")
+      } else if (!template.extendsType(productType) && template.extendsType(serializableType)) {
+        Patch.addRight(template, s" with Product")
       } else {
-        Patch.empty
+        Patch.addRight(template, s" with Product with Serializable")
       }
     }
   }
@@ -100,9 +107,14 @@ object Scalafixtoyexamples {
 
   final implicit class TemplateOps(private val t: Template) {
 
-    def isEmpty: Boolean = t.syntax.isEmpty()
+    def isEmpty: Boolean = t.inits.isEmpty
 
     def extendsOneOf(extensions: List[String]): Boolean =
-      extensions.exists(t.inits.map(_.toString()).contains)
+      extensions.exists(t.inits.map(_.tpe.toString()).contains)
+
+    def extendsAll(extensions: List[String]): Boolean =
+      extensions.forall(t.inits.map(_.tpe.toString()).contains)
+
+    def extendsType: String => Boolean = t.inits.map(_.tpe.toString()).contains
   }
 }
