@@ -1,6 +1,6 @@
 # scalafix-toy-examples
 
-Toy playground for scalafix, adapting few examples found in tutorials and talks. 
+Toy playground for scalafix, adapting few examples found in online tutorials and talks. 
 
 Scala version: Using scala 2.12 for now, because one of the examples (the cats upgrade from 0.9 to 1.0) cannot be written in scala 2.13 (because obviously 0.9 is not published for scala 2.13) 
 
