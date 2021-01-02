@@ -2,6 +2,9 @@ package fix
 
 import scalafix.v1._
 import scala.meta._
+import metaconfig.Conf.Bool
+
+import Scalafixtoyexamples._
 
 class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
 
@@ -11,11 +14,23 @@ class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
     }.asPatch
 
   def replaceCoproduct(implicit doc: SemanticDocument): Patch = {
-    import Scalafixtoyexamples._
     doc.tree.collect {
-      case c: Defn.Class if c.isSealed && c.isAbstract => Patch.empty
-      case t: Defn.Trait if t.isSealed                 => Patch.empty
+      case c: Defn.Class if c.isSealed && c.isAbstract => patch(c)
+      case t: Defn.Trait if t.isSealed                 => patch(t)
     }.asPatch
+  }
+
+  def patch[T <: Tree](t: T)(implicit hasTemplate: HasTemplate[T]): Patch = {
+    val template = t.template
+    if (template.isEmpty) {
+      Patch.addRight(t, s"")
+    } else {
+      if (template.extendsOneOf(List("Products", "Serializable"))) {
+        Patch.empty
+      } else {
+        Patch.empty
+      }
+    }
   }
 
   override def fix(implicit doc: SemanticDocument): Patch = {
@@ -56,4 +71,38 @@ object Scalafixtoyexamples {
 
   }
 
+  trait HasTemplate[T] {
+    def template(t: T): Template
+  }
+
+  object HasTemplate {
+    def template[T](t: T)(implicit hasTemplate: HasTemplate[T]): Template =
+      hasTemplate.template(t)
+  }
+
+  implicit val classHasTemplate: HasTemplate[Defn.Class] = new HasTemplate[Defn.Class] {
+
+    override def template(t: Defn.Class): Template = t.templ
+
+  }
+
+  implicit val traitHasTemplate: HasTemplate[Defn.Trait] = new HasTemplate[Defn.Trait] {
+
+    override def template(t: Defn.Trait): Template = t.templ
+
+  }
+
+  final implicit class HasTemplateOps[T: HasTemplate](private val t: T) {
+
+    def template: Template = HasTemplate.template(t)
+
+  }
+
+  final implicit class TemplateOps(private val t: Template) {
+
+    def isEmpty: Boolean = t.syntax.isEmpty()
+
+    def extendsOneOf(extensions: List[String]): Boolean =
+      extensions.exists(t.inits.map(_.toString()).contains)
+  }
 }
