@@ -5,6 +5,8 @@ import cats.data.EitherK
 object Scalafixtoyexamples {
   val x = 43
 
+  def addOffset(a: Double, b: Double): Double = a + 43 * b
+
   def something[A, F[_], G[_]](implicit Coproduct: EitherK[F, G, A]) = ???
   def something2[A, F[_], G[_]](implicit Coproduct: EitherK[F, G, A]) = ???
 }
