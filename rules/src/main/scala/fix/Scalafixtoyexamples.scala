@@ -6,22 +6,25 @@ import metaconfig.Conf.Bool
 
 import Scalafixtoyexamples._
 import scala.collection.immutable.Nil
+import scala.meta.internal.semanticdb.Scala.Names.TermName
 
 class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
 
-  def replace42(implicit doc: SemanticDocument): Patch =
-    doc.tree.collect { case t @ Lit.Int(42) =>
+  def replace42(implicit doc: SemanticDocument): Patch = doc.tree.collect {
+    case t @ Lit.Int(42) =>
       Patch.removeTokens(t.tokens) + Patch.addRight(t, "43")
-    }.asPatch
+  }.asPatch
 
-  def replaceCoproduct(implicit doc: SemanticDocument): Patch = {
+  def addProductWithSerializable(implicit doc: SemanticDocument): Patch = {
     doc.tree.collect {
       case c: Defn.Class if c.isSealed && c.isAbstract => patch(c)
       case t: Defn.Trait if t.isSealed                 => patch(t)
     }.asPatch
   }
 
-  def patch[T <: Tree](t: T)(implicit hasTemplate: HasTemplate[T]): Patch = {
+  private def patch[T <: Tree](
+      t: T
+  )(implicit hasTemplate: HasTemplate[T]): Patch = {
     val template = t.template
     if (template.isEmpty) {
       Patch.addRight(t, s" extends Product with Serializable")
@@ -40,7 +43,8 @@ class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
       val addTokenPatch =
         Patch.addRight(template, newTokens.mkString(" with "))
 
-      removeTokensPatch + addTokenPatch
+      //removeTokensPatch + addTokenPatch
+      addTokenPatch + removeTokensPatch
 
     }
   }
@@ -49,12 +53,25 @@ class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
     case c: Defn.Class if c.isCase && !c.isFinal => Patch.addLeft(c, "final ")
   }.asPatch
 
+  def replaceCoproduct(implicit doc: SemanticDocument): Patch = {
+    val coproductSymbol = SymbolMatcher.exact("cats/data/Coproduct#")
+    val eitherKSymbol = SymbolMatcher.exact("cats/data/EitherK#")
+
+    doc.tree.collect {
+      case t @ coproductSymbol(name) => {
+        println(name.pos.formatMessage("info", s"COPRODUCT FOUND $name"))
+        Patch.empty
+      }
+    }.asPatch
+    Patch.empty
+  }
+
   override def fix(implicit doc: SemanticDocument): Patch = {
     // print code has is
     println("Tree.syntax: " + doc.tree.syntax)
     println("Tree.structure: " + doc.tree.structure)
     println("Tree.structureLabeled: " + doc.tree.structureLabeled)
-    replace42 + replaceCoproduct + finalCaseClass
+    replace42 + replaceCoproduct + finalCaseClass + addProductWithSerializable
   }
 
 }
