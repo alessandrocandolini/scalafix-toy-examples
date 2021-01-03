@@ -20,6 +20,7 @@ inThisBuild(
     addCompilerPlugin(scalafixSemanticdb),
     scalacOptions ++= List(
       "-Yrangepos",
+      "-Ywarn-unused",
       "-P:semanticdb:synthetics:on"
     )
   )

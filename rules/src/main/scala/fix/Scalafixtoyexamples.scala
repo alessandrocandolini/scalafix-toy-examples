@@ -2,13 +2,15 @@ package fix
 
 import scalafix.v1._
 import scala.meta._
-import metaconfig.Conf.Bool
 
 import Scalafixtoyexamples._
-import scala.collection.immutable.Nil
-import scala.meta.internal.semanticdb.Scala.Names.TermName
+import metaconfig.Configured
 
 class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
+
+  override def isRewrite: Boolean = true
+
+  override def description: String = "rule to experiment with scalafix apis"
 
   def replaceLiterals(implicit doc: SemanticDocument): Patch =
     doc.tree.collect { case t @ Lit.Int(42) =>
@@ -31,7 +33,6 @@ class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
     if (template.isEmpty) {
       Patch.addRight(t, s" extends Product with Serializable")
     } else {
-      val tpes = template.inits.map(_.tpe.syntax)
 
       val oldTokens = template.tokens
         .map(_.text)
@@ -66,12 +67,41 @@ class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
     Patch.replaceSymbols("cats/data/Coproduct" -> "cats/data/EitherK")
   }
 
+  def removeUnusedImports(implicit doc: SemanticDocument): Patch = {
+    val positions = doc.diagnostics.collect {
+      case m if m.message.toLowerCase == "unused import" =>
+        m.position
+    }.toSet
+
+    // for simplicity here i'm assuming there is one import per line (no groups, no multiple imports)
+    // take a loot at the following for a more production-grade approach: https://github.com/scalacenter/scalafix/blob/master/scalafix-rules/src/main/scala/scalafix/internal/rule/RemoveUnused.scala
+
+    if (!positions.isEmpty) {
+      doc.tree.collect {
+        case t: Import if positions.exists(t.pos.includes) =>
+          Patch.removeTokens(t.tokens)
+      }.asPatch
+    } else {
+      Patch.empty
+    }
+  }
+
+  def removePureExpressions(implicit doc: SemanticDocument): Patch = {
+    val positions = doc.diagnostics.collect {
+      case m if m.message.toLowerCase.startsWith("unused import]") => m.position
+    }.toSet
+    Patch.empty
+
+  }
+
   override def fix(implicit doc: SemanticDocument): Patch = {
-    // print code has is
-    println("Tree.syntax: " + doc.tree.syntax)
-    println("Tree.structure: " + doc.tree.structure)
-    println("Tree.structureLabeled: " + doc.tree.structureLabeled)
-    replaceLiterals + replaceCoproduct + finalCaseClass + addProductWithSerializable
+    doc.diagnostics.foreach { d =>
+      println(s"HEEEEEEEEEEEEEEEEEEEEEE =\n${d.message}\n${d.position}")
+    }
+
+    println(s"size = ${doc.diagnostics.size}")
+
+    replaceLiterals + replaceCoproduct + finalCaseClass + addProductWithSerializable + removePureExpressions + removeUnusedImports
   }
 
 }
@@ -140,6 +170,13 @@ object Scalafixtoyexamples {
     def isEmpty: Boolean = t.inits.isEmpty
 
     def extendsType: String => Boolean = t.inits.map(_.tpe.syntax).contains
+  }
+
+  final implicit class PositionOps(pos: Position) {
+
+    def includes(p: Position): Boolean =
+      p.start >= pos.start && p.end <= pos.end
+
   }
 
 }

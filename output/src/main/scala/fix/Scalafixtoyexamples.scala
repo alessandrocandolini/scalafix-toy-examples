@@ -51,3 +51,7 @@ object Test {
   final case class Red8(opacity: Int) extends Colour8
   final case object Green8 extends Colour8
 }
+
+object RemovePureExpressionsInStatementPosition2 {
+  val x = 5
+}

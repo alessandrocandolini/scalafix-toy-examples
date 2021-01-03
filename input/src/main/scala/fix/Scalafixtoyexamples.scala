@@ -4,6 +4,7 @@ rule = Scalafixtoyexamples
 package fix
 
 import cats.data.Coproduct
+import cats.data.Cokleisli
 
 object Scalafixtoyexamples {
   val x = 42
@@ -53,4 +54,11 @@ object Test {
   sealed abstract class Colour8 extends Product with Useless4 with Serializable
   case class Red8(opacity: Int) extends Colour8
   final case object Green8 extends Colour8
+}
+
+object RemovePureExpressionsInStatementPosition2 {
+
+  "hello"
+
+  val x = 5
 }
