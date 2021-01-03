@@ -12,11 +12,9 @@ Examples include:
 * make all the case classes final by default 
 * have sealed traits and sealed abstract classes always extend `Product with serializable` automatically (the rule also sorts them, and supports cases where the original classes/traits were already extending either one or the other but not both). 
 
-Scala version: the project uses scala `2.12` for now, because one of the examples (the cats upgrade from 0.9 to 1.0) cannot be written in scala 2.13 (because obviously cats 0.9 is not published for scala 2.13) 
-
 The project is generated using the official Scalafix [giter8](https://github.com/foundweekends/giter8) template: https://github.com/scalacenter/scalafix.g8 
 
-Github actions are automatically generated from the sbt project structure using the following sbt plugin: https://github.com/djspiewak/sbt-github-actions
+Github actions were automatically generated from the sbt project structure using the following sbt plugin: https://github.com/djspiewak/sbt-github-actions but i had to tweak them because the project cannot run on scala 2.13 (just because cats is not available). I will restore them when I'll implement a similar example that doesn't require old version of libraries not published for latest scala. 
 
 Main references:
 
