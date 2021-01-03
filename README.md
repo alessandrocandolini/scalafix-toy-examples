@@ -2,9 +2,9 @@
 
 # scalafix-toy-examples
 
-Toy playground project to experiment with scalafix APIs, adapting few examples found in online tutorials and talks.
+Toy playground project to experiment with [scalafix](https://scalacenter.github.io/scalafix/)'s APIs, adapting few examples found in online tutorials and talks.
 
-All examples are handled within the same rule, by assembling different `Patches`, because this is just toy project; in a more production-grade setting, they would be different rules of course, or at least we would need to be careful to avoid conflicts. 
+All examples are handled by summing different `Patches` within the same rule, because this is just toy project. In a more production-grade setting, they would be different rules of course, or at least we would need to be extra careful to avoid conflicts. 
 
 Examples include:
 * replace literals, eg the `Lit.Int` with value `42` becomes `43` using `Patch.replaceTree` (warm up exercise to experiment with the literal types)
