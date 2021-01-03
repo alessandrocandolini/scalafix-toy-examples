@@ -54,16 +54,15 @@ class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
   }.asPatch
 
   def replaceCoproduct(implicit doc: SemanticDocument): Patch = {
-    val coproductSymbol = SymbolMatcher.exact("cats/data/Coproduct#")
-    val eitherKSymbol = SymbolMatcher.exact("cats/data/EitherK#")
-
+    // todo remove (for debugging)
+    val coproductSymbolMatcher = SymbolMatcher.exact("cats/data/Coproduct#")
     doc.tree.collect {
-      case t @ coproductSymbol(name) => {
-        println(name.pos.formatMessage("info", s"COPRODUCT FOUND $name"))
-        Patch.empty
+      case t @ coproductSymbolMatcher(name) => {
+        println(name.pos.formatMessage("info", s"COPRODUCT FOUND: ${t.syntax}"))
       }
-    }.asPatch
-    Patch.empty
+    }
+
+    Patch.replaceSymbols("cats/data/Coproduct" -> "cats/data/EitherK")
   }
 
   override def fix(implicit doc: SemanticDocument): Patch = {
