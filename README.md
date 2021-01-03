@@ -18,7 +18,7 @@ The project is generated using the official Scalafix [giter8](https://github.com
 
 Github actions are automatically generated from the sbt project structure using the following sbt plugin: https://github.com/djspiewak/sbt-github-actions
 
-References:
+Main references:
 
 [1] Gabriele Petronella, Scalafix workshop, Scala World https://www.youtube.com/watch?v=uaMWvkCJM_E&t=3212s
 
