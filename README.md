@@ -7,12 +7,19 @@ Toy playground project to experiment with scalafix APIs, adapting few examples f
 All examples are handled within the same rule, by assembling different `Patches`, because this is just toy project; in a more production-grade setting, they would be different rules of course, or at least we would need to be careful to avoid conflicts. 
 
 Examples include:
-* replace 42 with 43 (for fun)
+* replace literals, eg the `Lit.Int` with value `42` becomes `43` using `Patch.replaceTree` (warm up exercise to experiment with the literal types)
 * replace `cats.data.Coproduct` (cats < 1.0) to `cats.data.EitherK` using `renameSymbol` 
-* make all the case classes final by default 
-* have sealed traits and sealed abstract classes always extend `Product with serializable` automatically (the rule also sorts them, and supports cases where the original classes/traits were already extending either one or the other but not both). 
+* make all the case classes final by default, using `Patch.addLeft` 
+* have sealed traits and sealed abstract classes always extend `Product with serializable` automatically using `Template` API (the rule also sorts them, and supports cases where the original classes/traits were already extending either one or the other but not both). 
 
 The project is generated using the official Scalafix [giter8](https://github.com/foundweekends/giter8) template: https://github.com/scalacenter/scalafix.g8 
+and it follows its standard structure, ie, a `sbt` project with four sub-projects: rules, where the code lives; tests, scaffolding for running the tests; input and output subprojects that are used as input and expected result in the tests. To run the tests use 
+
+```
+sbt tests/test
+```
+
+(if you want to do TDD, `sbt ~tests/test`) 
 
 Github actions were automatically generated from the sbt project structure using the following sbt plugin: https://github.com/djspiewak/sbt-github-actions but i had to tweak them because the project cannot run on scala 2.13 (just because cats is not available). I will restore them when I'll implement a similar example that doesn't require old version of libraries not published for latest scala. 
 
