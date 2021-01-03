@@ -7,6 +7,8 @@ import cats.data.Coproduct
 
 object Scalafixtoyexamples {
   val x = 42
+  val y = "42"
+  val z: Double = 42
 
   def addOffset(a: Double, b: Double): Double = a + 42 * b
 

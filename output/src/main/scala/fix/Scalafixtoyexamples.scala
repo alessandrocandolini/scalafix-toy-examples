@@ -4,6 +4,8 @@ import cats.data.EitherK
 
 object Scalafixtoyexamples {
   val x = 43
+  val y = "42"
+  val z: Double = 43
 
   def addOffset(a: Double, b: Double): Double = a + 43 * b
 

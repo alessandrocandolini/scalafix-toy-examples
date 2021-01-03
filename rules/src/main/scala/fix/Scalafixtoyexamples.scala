@@ -10,19 +10,21 @@ import scala.meta.internal.semanticdb.Scala.Names.TermName
 
 class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
 
-  def replace42(implicit doc: SemanticDocument): Patch = doc.tree.collect {
-    case t @ Lit.Int(42) =>
-      Patch.removeTokens(t.tokens) + Patch.addRight(t, "43")
-  }.asPatch
+  def replaceLiterals(implicit doc: SemanticDocument): Patch =
+    doc.tree.collect { case t @ Lit.Int(42) =>
+      Patch.replaceTree(t, "43")
+    }.asPatch
 
   def addProductWithSerializable(implicit doc: SemanticDocument): Patch = {
     doc.tree.collect {
-      case c: Defn.Class if c.isSealed && c.isAbstract => patch(c)
-      case t: Defn.Trait if t.isSealed                 => patch(t)
+      case c: Defn.Class if c.isSealed && c.isAbstract =>
+        addProductWithSerializableToTemplate(c)
+      case t: Defn.Trait if t.isSealed =>
+        addProductWithSerializableToTemplate(t)
     }.asPatch
   }
 
-  private def patch[T <: Tree](
+  private def addProductWithSerializableToTemplate[T <: Tree](
       t: T
   )(implicit hasTemplate: HasTemplate[T]): Patch = {
     val template = t.template
@@ -43,7 +45,6 @@ class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
       val addTokenPatch =
         Patch.addRight(template, newTokens.mkString(" with "))
 
-      //removeTokensPatch + addTokenPatch
       addTokenPatch + removeTokensPatch
 
     }
@@ -70,7 +71,7 @@ class Scalafixtoyexamples extends SemanticRule("Scalafixtoyexamples") {
     println("Tree.syntax: " + doc.tree.syntax)
     println("Tree.structure: " + doc.tree.structure)
     println("Tree.structureLabeled: " + doc.tree.structureLabeled)
-    replace42 + replaceCoproduct + finalCaseClass + addProductWithSerializable
+    replaceLiterals + replaceCoproduct + finalCaseClass + addProductWithSerializable
   }
 
 }
@@ -140,4 +141,5 @@ object Scalafixtoyexamples {
 
     def extendsType: String => Boolean = t.inits.map(_.tpe.syntax).contains
   }
+
 }
