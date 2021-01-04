@@ -4,9 +4,9 @@
 
 Toy playground project to experiment with [scalafix](https://scalacenter.github.io/scalafix/)'s APIs, adapting few examples found in online tutorials and talks.
 
-All examples are handled by summing different `Patches` within the same rule, because this is just toy project. In a more production-grade setting, they would be different rules of course, or at least we would need to be extra careful to avoid conflicts. 
+This rule applies many changes. The changes are modular and implemented in different methods, but the final rule sums all these changes and tests will test several changes. This is not good practise obviously, but this is just a playground to try different things. In a more production-grade setting, the different changes would be different rules, or at least extra care would be needed to be sure to avoid conflicts. 
 
-Examples include:
+Changes applied include:
 * replace literals, eg the `Lit.Int` with value `42` becomes `43` using `Patch.replaceTree` (warm up exercise to experiment with the literal types)
 * replace `cats.data.Coproduct` (cats < 1.0) to `cats.data.EitherK` using `renameSymbol` 
 * make all the case classes final by default, using `Patch.addLeft` 
